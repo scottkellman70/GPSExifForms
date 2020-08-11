@@ -1,6 +1,8 @@
-﻿using LevDan.Exif;
+﻿using ClosedXML.Excel;
+using LevDan.Exif;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -26,7 +28,7 @@ namespace GPSExifForms
             }
         }
 
-        private void buttonDestination_Click(object sender, EventArgs e)
+        private void ButtonDestination_Click(object sender, EventArgs e)
         {
             DialogResult result = folderBrowserDialog1.ShowDialog();
 
@@ -36,15 +38,37 @@ namespace GPSExifForms
             }
         }
 
-        private void buttonProcess_Click(object sender, EventArgs e)
+        private void ButtonProcess_Click(object sender, EventArgs e)
         {
             StringBuilder sb = new StringBuilder();
+            DataTable dtGPSData = new DataTable();
+
+            dtGPSData.Columns.AddRange(new DataColumn[11]
+            {
+                new DataColumn("Filename", typeof(string)),
+                new DataColumn("Latitude", typeof(double)),
+                new DataColumn("Longitude", typeof(double)),
+                new DataColumn("Altitude",typeof(string)),
+                new DataColumn("Make", typeof(string)),
+                new DataColumn("Model",typeof(string)),
+                new DataColumn("ModifyDateTime", typeof(string)),
+                new DataColumn("GPSTimeAtomicClock", typeof(string)),
+                new DataColumn("DateTimeOriginal",typeof(string)),
+                new DataColumn("DateTimeDigitized", typeof(string)),
+                new DataColumn("GPSDateStamp", typeof(string))
+            });
+
             double latitude = 0;
             double longitude = 0;
             string altitude = string.Empty;
-            string dateTime = string.Empty;
+            string modifyDateTime = string.Empty;
             string make = string.Empty;
             string model = string.Empty;
+            string gpsTimeStamp = string.Empty;
+            string dateTimeOriginal = string.Empty;
+            string dateTimeDigitized = string.Empty;
+            string gpsDateStamp = string.Empty;
+
             List<string> photos = new List<string>();
             DirectoryInfo source = new DirectoryInfo(textBoxSource.Text);
             DirectoryInfo destination = new DirectoryInfo(textBoxDestination.Text);
@@ -57,7 +81,7 @@ namespace GPSExifForms
                 {
                     ExifGPSLatLonTagCollection exif = new ExifGPSLatLonTagCollection(path.FullName);
 
-                    if (exif.Count() >= 3)//datetime, lat, long
+                    if (exif.Count() >= 3)
                     {
                         foreach (ExifTag tag in exif)
                         {
@@ -107,7 +131,7 @@ namespace GPSExifForms
                                     }
                                 case "DateTime":
                                     {
-                                        dateTime = tag.Value;
+                                        modifyDateTime = tag.Value;
                                         break;
                                     }
                                 case "Make":
@@ -120,36 +144,62 @@ namespace GPSExifForms
                                         model = tag.Value;
                                         break;
                                     }
+                                case "DateTimeOriginal":
+                                    {
+                                        dateTimeOriginal = tag.Value;
+                                        break;
+                                    }
+                                case "DateTimeDigitized":
+                                    {
+                                        dateTimeDigitized = tag.Value;
+                                        break;
+                                    }
+                                case "GPSDateStamp":
+                                    {
+                                        gpsDateStamp = tag.Value;
+                                        break;
+                                    }
+                                case "GPSTimeStamp":
+                                    {
+                                        gpsTimeStamp = tag.Value;
+                                        break;
+                                    }
                             }
                         }
-                        sb.Append(Path.GetFileName(path.FullName) + "," + latitude + "," + longitude + "," + altitude + "," + make + "," + model);
-                        sb.Append(Environment.NewLine);
-                        photos.Add(longitude + "," + latitude + "," + altitude + "," + dateTime + "," + Path.GetFileName(path.FullName) + "," + make + "," + model);
+
+                        if (latitude > 0 && longitude > 0)
+                        {
+                            dtGPSData.Rows.Add(Path.GetFileName(path.FullName).ToString(), latitude.ToString(),
+                                longitude.ToString(), altitude.ToString(), make.ToString(), model.ToString(),
+                                modifyDateTime.ToString(), dateTimeOriginal.ToString(), dateTimeDigitized.ToString(),
+                                gpsDateStamp.ToString(), gpsTimeStamp.ToString());
+
+                            photos.Add(longitude + "," + latitude + "," + altitude + "," + modifyDateTime + "," +
+                                Path.GetFileName(path.FullName) + "," + make + "," + model);
+                        }
+
                         latitude = 0;
                         longitude = 0;
                         altitude = string.Empty;
-                        dateTime = string.Empty;
+                        modifyDateTime = string.Empty;
                         make = string.Empty;
-                    }
-                    else
-                    {
-                        sb.Clear();
+                        model = string.Empty;
                     }
                 }
-                catch (Exception) { }
+                catch { }
             }
 
             if (photos.Count > 0)
             {
-                string path3 = Path.Combine(@"C:\Users\OCONUS4\Desktop\Cases\Results", "photos.kml");
+                string path3 = Path.Combine(destination.FullName, "Photo GPS Report.kml");
                 KML.Create(photos, path3);
-
-                string path2 = Path.Combine(@"C:\Users\OCONUS4\Desktop\Cases\Results", "report.txt");
-                File.WriteAllText(path2, sb.ToString());
             }
-            else
+
+            using (XLWorkbook wb = new XLWorkbook())
             {
-                MessageBox.Show("No locational data in the selected photo set.");
+                string path = Path.Combine(destination.FullName, "Photo Location Report.xlsx");
+                wb.Worksheets.Add(dtGPSData, "GPS");
+                wb.SaveAs(path);
             }
 
             MessageBox.Show("Done processing files");
@@ -163,7 +213,7 @@ namespace GPSExifForms
                 using (XmlWriter writer = XmlWriter.Create(path))
                 {
                     writer.WriteStartElement("Document");
-                    writer.WriteElementString("name", "photos.xml");
+                    writer.WriteElementString("name", "gps_photo_report.xml");
                     writer.WriteElementString("open", "1");
 
                     writer.WriteStartElement("Style");
@@ -189,16 +239,14 @@ namespace GPSExifForms
                         sb.Append(Environment.NewLine);
                         sb.Append("Model: " + splitUp[6].ToString());
 
-                        if (splitUp[0].ToString() != "0" && splitUp[1].ToString() != "0")
-                        {
-                            writer.WriteStartElement("Placemark");
-                            writer.WriteElementString("description", sb.ToString());
-                            writer.WriteElementString("name", splitUp[4].ToString());
-                            writer.WriteStartElement("Point");
-                            writer.WriteElementString("coordinates", splitUp[0].ToString() + "," + splitUp[1].ToString());
-                            writer.WriteEndElement();//Point
-                            writer.WriteEndElement();//Placemark
-                        }
+                        writer.WriteStartElement("Placemark");
+                        writer.WriteElementString("description", sb.ToString());
+                        writer.WriteElementString("name", splitUp[4].ToString());
+                        writer.WriteStartElement("Point");
+                        writer.WriteElementString("coordinates", splitUp[0].ToString() + "," + splitUp[1].ToString());
+                        writer.WriteEndElement();//Point
+                        writer.WriteEndElement();//Placemark
+
                         sb.Clear();
                     }
 
@@ -207,5 +255,6 @@ namespace GPSExifForms
                 }
             }
         }
+
     }
 }

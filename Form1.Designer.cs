@@ -34,6 +34,8 @@
             this.textBoxDestination = new System.Windows.Forms.TextBox();
             this.buttonDestination = new System.Windows.Forms.Button();
             this.buttonProcess = new System.Windows.Forms.Button();
+            this.button1 = new System.Windows.Forms.Button();
+            this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.SuspendLayout();
             // 
             // ButtonSource
@@ -68,7 +70,7 @@
             this.buttonDestination.TabIndex = 2;
             this.buttonDestination.Text = "Destination";
             this.buttonDestination.UseVisualStyleBackColor = true;
-            this.buttonDestination.Click += new System.EventHandler(this.buttonDestination_Click);
+            this.buttonDestination.Click += new System.EventHandler(this.ButtonDestination_Click);
             // 
             // buttonProcess
             // 
@@ -78,13 +80,27 @@
             this.buttonProcess.TabIndex = 4;
             this.buttonProcess.Text = "Process";
             this.buttonProcess.UseVisualStyleBackColor = true;
-            this.buttonProcess.Click += new System.EventHandler(this.buttonProcess_Click);
+            this.buttonProcess.Click += new System.EventHandler(this.ButtonProcess_Click);
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(12, 126);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(75, 23);
+            this.button1.TabIndex = 5;
+            this.button1.Text = "button1";
+            this.button1.UseVisualStyleBackColor = true;
+            // 
+            // openFileDialog1
+            // 
+            this.openFileDialog1.FileName = "openFileDialog1";
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.buttonProcess);
             this.Controls.Add(this.textBoxDestination);
             this.Controls.Add(this.buttonDestination);
@@ -105,6 +121,8 @@
         private System.Windows.Forms.TextBox textBoxDestination;
         private System.Windows.Forms.Button buttonDestination;
         private System.Windows.Forms.Button buttonProcess;
+        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.OpenFileDialog openFileDialog1;
     }
 }
 

@@ -33,8 +33,18 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="ClosedXML">
+      <HintPath>..\..\..\Downloads\Export_DataGridView_Excel\Export_DataGridView_Excel_CS\bin\Debug\ClosedXML.dll</HintPath>
+    </Reference>
+    <Reference Include="CompactExifLib">
+      <HintPath>..\CompactExifLib\bin\Debug\CompactExifLib.dll</HintPath>
+    </Reference>
     <Reference Include="CoordinateSharp, Version=2.7.1.1, Culture=neutral, PublicKeyToken=f45e02df057b7725, processorArchitecture=MSIL">
       <HintPath>packages\CoordinateSharp.2.7.1.1\lib\net40\CoordinateSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="DocumentFormat.OpenXml, Version=2.5.5631.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Downloads\Export_DataGridView_Excel\Export_DataGridView_Excel_CS\bin\Debug\DocumentFormat.OpenXml.dll</HintPath>
     </Reference>
     <Reference Include="ExifMetadata">
       <HintPath>..\..\..\Downloads\exif_source_demo\ExifMetadata\bin\Debug\ExifMetadata.dll</HintPath>
